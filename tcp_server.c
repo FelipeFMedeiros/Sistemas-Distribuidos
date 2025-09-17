@@ -32,7 +32,7 @@
 
 // Estrutura para passar dados para cada thread (contexto da conexão)
 typedef struct { int cfd; struct sockaddr_in caddr; } ctx_t;
-static volatile int running = 1;  // Controla se o servidor continua rodando
+static volatile sig_atomic_t running = 1;  // Controla se o servidor continua rodando (tipo seguro para sinais)
 
 // Função que cada thread executa para atender um cliente
 static void *worker(void *p) {
@@ -68,7 +68,11 @@ static void *worker(void *p) {
 }
 
 // Handler para sinal SIGINT (Ctrl+C) - para encerrar servidor graciosamente
-static void on_sig(int s) { (void) s; running = 0; }
+static void on_sig(int s) { 
+    (void) s; 
+    running = 0; 
+    fprintf(stderr, "[TCP] sinal SIGINT recebido, encerrando...\n");
+}
 
 int main(int argc, char **argv) {
     if (argc != 2) {
@@ -76,7 +80,16 @@ int main(int argc, char **argv) {
         return 1;
     }
     int port = atoi(argv[1]);
-    signal(SIGINT, on_sig);  // Configura handler para Ctrl+C
+    
+    // Configura handler para Ctrl+C usando sigaction (mais robusto em multi-thread)
+    struct sigaction sa;
+    sa.sa_handler = on_sig;
+    sa.sa_flags = 0;
+    sigemptyset(&sa.sa_mask);
+    if (sigaction(SIGINT, &sa, NULL) < 0) {
+        perror("sigaction");
+        return 1;
+    }
 
     // Cria socket TCP
     int sfd = socket(AF_INET, SOCK_STREAM, 0);
