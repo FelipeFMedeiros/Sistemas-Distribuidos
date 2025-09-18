@@ -69,7 +69,11 @@ static void *worker(void *p) {
 }
 
 // Handler para sinal SIGINT (Ctrl+C)
-static void on_sig(int s) { (void) s; running = 0; }
+static void on_sig(int s) {
+    (void)s;
+    running = 0;
+    fprintf(stderr, "[UDP] sinal SIGINT recebido, encerrando...\n");
+}
 
 int main(int argc, char **argv) {
     if (argc != 2) { 
@@ -78,7 +82,15 @@ int main(int argc, char **argv) {
     }
 
     int port = atoi(argv[1]);
-    signal(SIGINT, on_sig);  // Registra handler para encerramento gracioso
+
+    struct sigaction sa;
+    sa.sa_handler = on_sig;
+    sa.sa_flags = 0;
+    sigemptyset(&sa.sa_mask);
+    if (sigaction(SIGINT, &sa, NULL) < 0) {
+        perror("sigaction");
+        return 1;
+    }
     
     // Cria socket UDP
     int sfd = socket(AF_INET, SOCK_DGRAM, 0); 

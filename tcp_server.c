@@ -121,6 +121,7 @@ int main(int argc, char **argv) {
 
     // Loop principal: aceita conexões enquanto running = 1
     while (running) {
+        sleep(1); // Para visualizar a chegada de clientes
         struct sockaddr_in c; socklen_t cl = sizeof c;
         // Aceita nova conexão (bloqueia até chegada de cliente)
         int cfd = accept(sfd, (struct sockaddr *) &c, &cl);
