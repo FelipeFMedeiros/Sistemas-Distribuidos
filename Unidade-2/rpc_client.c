@@ -8,6 +8,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <stdint.h>
 
 /*
  * RPC CLIENT (TCP)
