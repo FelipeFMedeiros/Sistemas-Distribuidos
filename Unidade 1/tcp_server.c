@@ -40,7 +40,7 @@ static void *worker(void *p) {
     char ip[INET_ADDRSTRLEN];
     // Converte o endereço IP do cliente para string legível
     inet_ntop(AF_INET, &ctx->caddr.sin_addr, ip, sizeof ip);
-    int cport = ntohs(ctx->caddr.sin_port);  // Converte porta para host byte order
+    int cport = ntohs(ctx->caddr.sin_port);  // Extrai a porta do cliente com ntohs()
     fprintf(stderr, "[TCP] conexão %s:%d\n", ip, cport);
 
     char buf[BUFSZ];
@@ -61,8 +61,10 @@ static void *worker(void *p) {
     // Prepara resposta de eco com ID da thread
     char out[BUFSZ]; snprintf(out, sizeof out, "OK TCP thr=%lu eco: %s",
         (unsigned long) pthread_self(), buf);
-    send(ctx->cfd, out, strlen(out), 0);  // Envia resposta
-    close(ctx->cfd); free(ctx);  // Limpa recursos
+        
+    send(ctx->cfd, out, strlen(out), 0);  // Envia resposta no soket dedicado (cfd)
+    close(ctx->cfd); // Fecha a conexão com o cliente
+    free(ctx);  // Limpa recursos
     fprintf(stderr, "[TCP] fim %s:%d\n", ip, cport);
     return NULL;
 }
@@ -124,7 +126,7 @@ int main(int argc, char **argv) {
         sleep(1); // Para visualizar a chegada de clientes
         struct sockaddr_in c; socklen_t cl = sizeof c;
         // Aceita nova conexão (bloqueia até chegada de cliente)
-        int cfd = accept(sfd, (struct sockaddr *) &c, &cl);
+        int cfd = accept(sfd, (struct sockaddr *) &c, &cl); // accept() é a função que recebe/aceita a conexão TCP
 
         if (cfd < 0) {
             if (errno == EINTR) break;  // Interrompido por sinal

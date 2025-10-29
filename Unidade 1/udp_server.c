@@ -47,7 +47,7 @@ static void *worker(void *p) {
     
     // Converte IP do cliente para string legível
     inet_ntop(AF_INET, &t->cli.sin_addr, ip, sizeof ip);
-    int cport = ntohs(t->cli.sin_port);  // Converte porta para host byte order
+    int cport = ntohs(t->cli.sin_port);  // Extrai a porta do cliente com ntohs()
 
     fprintf(stderr, "[UDP] de %s:%d: %.*s\n", ip, cport, (int) t->len, t->data);
     fprintf(stderr, "[UDP] processando %s:%d...\n", ip, cport);
@@ -60,8 +60,10 @@ static void *worker(void *p) {
         (unsigned long) pthread_self(), (int) t->len, t->data);
 
     // Envia resposta de volta para o cliente
-    sendto(t->sfd, out, n, 0, (struct sockaddr *) &t->cli, t->clisz);
+    sendto(t->sfd, out, n, 0, (struct sockaddr *) &t->cli, t->clisz); 
     
+    // UDP não fecha conexão, é stateless
+
     // Libera memória alocada
     free(t->data);
     free(t);
@@ -124,7 +126,7 @@ int main(int argc, char **argv) {
         socklen_t cl = sizeof cli;
 
         // Recebe dados de qualquer cliente
-        ssize_t n = recvfrom(sfd, buf, sizeof buf, 0, (struct sockaddr *) &cli, &cl);
+        ssize_t n = recvfrom(sfd, buf, sizeof buf, 0, (struct sockaddr *) &cli, &cl); // recvfrom() é a função que recebe dados UDP
 
         if (n < 0) { 
             if (errno == EINTR) break; 

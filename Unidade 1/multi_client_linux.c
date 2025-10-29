@@ -70,7 +70,7 @@ static void *run_tcp(void *p) {
     } else {
         perror("[TCP] recv");
     }
-
+    // TCP: O servidor encerra primeiro (close(ctx->cfd) na função worker), depois o cliente detecta (r == 0 no recv) e também fecha
     close(s);   // Fecha socket
     free(j);    // Libera memória do job
     return NULL;
@@ -109,6 +109,7 @@ static void *run_udp(void *p) {
     }
 
     socklen_t sl = sizeof srv;
+
     // Recebe resposta via UDP
     int r = recvfrom(s, buf, sizeof buf - 1, 0, (struct sockaddr *)&srv, &sl);
     if (r > 0) {
@@ -121,7 +122,7 @@ static void *run_udp(void *p) {
             perror("[UDP] recvfrom");
         }
     }
-
+    // UDP: O cliente encerra (simplesmente para de enviar/receber e fecha o socket)
     close(s);   // Fecha socket
     free(j);    // Libera memória do job
     return NULL;
