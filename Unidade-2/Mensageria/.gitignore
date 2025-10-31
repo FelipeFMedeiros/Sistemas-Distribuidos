@@ -1,0 +1,25 @@
+# Dependências
+node_modules/
+dist/
+
+# Credenciais do Google Cloud (NUNCA commitar!)
+service-account-key.json
+credentials.json
+
+# Variáveis de ambiente
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema Operacional
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
