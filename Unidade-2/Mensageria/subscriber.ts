@@ -10,7 +10,7 @@ async function runSubscriber() {
     // Escolha qual assinatura usar:
     // - 'mysub-1'
     // - 'mysub-2'
-    const subscriptionName = 'mysub';
+    const subscriptionName = 'mysub-1';
 
     const subscriber = new Subscriber(subscriptionName);
 
